@@ -1,4 +1,11 @@
 import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import {
   ErroRegraDeNegocio,
   ErroValidacao,
 } from '../comum/erros/erros-de-dominio.js';
@@ -22,15 +29,38 @@ const MENSAGEM_DE_STATUS_FINAL: Record<StatusFinal, string> = {
     'Esta consulta foi cancelada e não pode mudar de status.',
 };
 
+@Entity('consultas')
 export class Consulta {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ name: 'nome_paciente', type: 'varchar', length: 150 })
   nomePaciente: string;
+
+  @Column({ name: 'cpf_paciente', type: 'char', length: 14 })
   cpfPaciente: string;
+
+  @Column({ name: 'data_hora', type: 'timestamptz' })
   dataHora: Date;
+
+  @Column({ type: 'varchar', length: 100 })
   especialidade: string;
+
+  @Column({ type: 'varchar', length: 1000, nullable: true })
   observacoes: string | null;
+
+  @Column({
+    type: 'enum',
+    enum: StatusConsulta,
+    enumName: 'status_consulta',
+    default: StatusConsulta.Agendada,
+  })
   status: StatusConsulta;
+
+  @CreateDateColumn({ name: 'criado_em', type: 'timestamptz' })
   criadoEm: Date;
+
+  @UpdateDateColumn({ name: 'atualizado_em', type: 'timestamptz' })
   atualizadoEm: Date;
 
   static agendar(dados: DadosDoAgendamento, agora: Date): Consulta {
