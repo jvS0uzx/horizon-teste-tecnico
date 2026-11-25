@@ -1,38 +1,21 @@
 name: agendamento-consultas
 
-x-postgres: &postgres
-  image: postgres:18-alpine
-  healthcheck:
-    test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
-    interval: 5s
-    timeout: 5s
-    retries: 10
-
 services:
   banco:
-    <<: *postgres
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: ${BANCO_USUARIO:?copie .env.example para .env}
       POSTGRES_PASSWORD: ${BANCO_SENHA:?copie .env.example para .env}
       POSTGRES_DB: ${BANCO_NOME:?copie .env.example para .env}
-      TZ: ${FUSO_HORARIO:-America/Sao_Paulo}
     ports:
       - '${PORTA_BANCO:-5433}:5432'
     volumes:
       - dados-banco:/var/lib/postgresql
-
-  banco-teste:
-    <<: *postgres
-    profiles: [teste]
-    environment:
-      POSTGRES_USER: ${BANCO_USUARIO:?copie .env.example para .env}
-      POSTGRES_PASSWORD: ${BANCO_SENHA:?copie .env.example para .env}
-      POSTGRES_DB: ${BANCO_NOME_TESTE:?copie .env.example para .env}
-      TZ: ${FUSO_HORARIO:-America/Sao_Paulo}
-    ports:
-      - '${PORTA_BANCO_TESTE:-5434}:5432'
-    tmpfs:
-      - /var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
   dados-banco:

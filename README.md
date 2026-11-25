@@ -31,15 +31,10 @@ status, exclusão e listagem de consultas, com as regras de negócio aplicadas n
 
 ## Banco de dados
 
-O PostgreSQL 18 roda em contêiner, em dois serviços do Docker Compose:
-
-| Serviço | Banco | Porta na sua máquina | Uso |
-|---|---|---|---|
-| `banco` | `agendamento` | 5433 | aplicação; dados persistidos no volume `dados-banco` |
-| `banco-teste` | `agendamento_teste` | 5434 | testes de integração; dados em memória, descartados ao parar |
-
-As portas evitam conflito com um PostgreSQL instalado localmente na 5432 e podem ser alteradas em
-`PORTA_BANCO` e `PORTA_BANCO_TESTE` no `.env`.
+O PostgreSQL 18 roda no serviço `banco` do Docker Compose, com o banco `agendamento` e os dados
+persistidos no volume `dados-banco`. Ele fica exposto na porta **5433** da sua máquina, para não
+conflitar com um PostgreSQL instalado localmente na 5432; para mudar, altere `PORTA_BANCO` no
+`.env`.
 
 1. Copie as variáveis de ambiente:
 
