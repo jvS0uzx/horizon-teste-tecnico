@@ -1,6 +1,6 @@
 import { DataSourceOptions } from 'typeorm';
 import { Consulta } from '../consultas/consulta.entity.js';
-import { CriarTabelaConsultas1764100000000 } from './migrations/1764100000000-criar-tabela-consultas.js';
+import { CriarConsultas1795649071703 } from './migrations/1795649071703-CriarConsultas.js';
 
 export function opcoesDoBanco(
   variavel: (nome: string) => string,
@@ -13,6 +13,6 @@ export function opcoesDoBanco(
     password: variavel('BANCO_SENHA'),
     database: variavel('BANCO_NOME'),
     entities: [Consulta],
-    migrations: [CriarTabelaConsultas1764100000000],
+    migrations: [CriarConsultas1795649071703],
   };
 }

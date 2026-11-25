@@ -5,6 +5,6 @@ const formatadorDeDia = new Intl.DateTimeFormat('pt-BR', {
   dateStyle: 'short',
 });
 
-export function saoDoMesmoDiaNaClinica(primeira: Date, segunda: Date): boolean {
+export function mesmoDiaNaClinica(primeira: Date, segunda: Date): boolean {
   return formatadorDeDia.format(primeira) === formatadorDeDia.format(segunda);
 }

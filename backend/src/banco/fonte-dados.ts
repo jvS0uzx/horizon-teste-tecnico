@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { opcoesDoBanco } from './opcoes-do-banco.js';
+import { opcoesDoBanco } from './opcoes.js';
 
 function variavelDeAmbiente(nome: string): string {
   const valor = process.env[nome];

@@ -1,6 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CriarTabelaConsultas1764100000000 implements MigrationInterface {
+export class CriarConsultas1795649071703 implements MigrationInterface {
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       CREATE TYPE "status_consulta" AS ENUM ('AGENDADA', 'REALIZADA', 'CANCELADA')

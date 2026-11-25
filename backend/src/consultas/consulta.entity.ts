@@ -5,11 +5,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import {
-  ErroRegraDeNegocio,
-  ErroValidacao,
-} from '../comum/erros/erros-de-dominio.js';
-import { saoDoMesmoDiaNaClinica } from './calendario-da-clinica.js';
+import { ErroRegraDeNegocio, ErroValidacao } from '../comum/erros.js';
+import { mesmoDiaNaClinica } from './calendario.js';
 import { StatusConsulta } from './status-consulta.enum.js';
 
 export interface DadosDoAgendamento {
@@ -22,7 +19,7 @@ export interface DadosDoAgendamento {
 
 type StatusFinal = Exclude<StatusConsulta, StatusConsulta.Agendada>;
 
-const MENSAGEM_DE_STATUS_FINAL: Record<StatusFinal, string> = {
+const MENSAGEM_STATUS_FINAL: Record<StatusFinal, string> = {
   [StatusConsulta.Realizada]:
     'Esta consulta já foi realizada e não pode mudar de status.',
   [StatusConsulta.Cancelada]:
@@ -96,9 +93,9 @@ export class Consulta {
   }
 
   realizar(agora: Date): void {
-    this.garantirQueEstaAgendada();
+    this.exigirAgendada();
 
-    if (!saoDoMesmoDiaNaClinica(this.dataHora, agora)) {
+    if (!mesmoDiaNaClinica(this.dataHora, agora)) {
       throw new ErroRegraDeNegocio(
         'A consulta só pode ser marcada como realizada no dia agendado.',
       );
@@ -108,13 +105,13 @@ export class Consulta {
   }
 
   cancelar(): void {
-    this.garantirQueEstaAgendada();
+    this.exigirAgendada();
     this.status = StatusConsulta.Cancelada;
   }
 
-  private garantirQueEstaAgendada(): void {
+  private exigirAgendada(): void {
     if (this.status !== StatusConsulta.Agendada) {
-      throw new ErroRegraDeNegocio(MENSAGEM_DE_STATUS_FINAL[this.status]);
+      throw new ErroRegraDeNegocio(MENSAGEM_STATUS_FINAL[this.status]);
     }
   }
 

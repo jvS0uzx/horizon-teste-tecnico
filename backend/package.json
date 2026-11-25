@@ -12,8 +12,8 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "migration:run": "node --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:run -d dist/banco/fonte-de-dados.js",
-    "migration:revert": "node --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:revert -d dist/banco/fonte-de-dados.js",
+    "migration:run": "node --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:run -d dist/banco/fonte-dados.js",
+    "migration:revert": "node --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:revert -d dist/banco/fonte-dados.js",
     "lint": "oxlint --type-aware src/"
   },
   "dependencies": {

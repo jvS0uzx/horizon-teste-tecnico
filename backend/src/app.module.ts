@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { opcoesDoBanco } from './banco/opcoes-do-banco.js';
+import { opcoesDoBanco } from './banco/opcoes.js';
 
 @Module({
   imports: [
