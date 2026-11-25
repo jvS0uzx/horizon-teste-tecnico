@@ -55,3 +55,32 @@ conflitar com um PostgreSQL instalado localmente na 5432; para mudar, altere `PO
    ```
 
    Resultado esperado: `PostgreSQL 18.x`.
+
+## Migrations
+
+A migration cria o tipo `status_consulta`, a tabela `consultas` e as regras que o próprio banco
+garante: tamanho mínimo do nome e da especialidade, formato do CPF (`000.000.000-00`) e um índice
+único que impede duas consultas não canceladas com o mesmo CPF na mesma data e hora.
+
+1. Configure e instale a API:
+
+   ```bash
+   cd backend
+   cp .env.example .env
+   npm install
+   ```
+
+2. Compile e rode as migrations:
+
+   ```bash
+   npm run build
+   npm run migration:run
+   ```
+
+3. Confira a tabela:
+
+   ```bash
+   docker compose exec banco psql -U agendamento -d agendamento -c "\d consultas"
+   ```
+
+Para desfazer a última migration: `npm run migration:revert`.
