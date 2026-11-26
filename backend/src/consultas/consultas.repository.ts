@@ -17,6 +17,18 @@ export class ConsultasRepository {
     return this.repositorio.save(consulta);
   }
 
+  buscarPorId(id: string): Promise<Consulta | null> {
+    return this.repositorio.findOneBy({ id });
+  }
+
+  listar(pagina: number, limite: number): Promise<[Consulta[], number]> {
+    return this.repositorio.findAndCount({
+      order: { dataHora: 'ASC', id: 'ASC' },
+      skip: (pagina - 1) * limite,
+      take: limite,
+    });
+  }
+
   existeAtivaNoHorario(cpfPaciente: string, dataHora: Date): Promise<boolean> {
     return this.repositorio.exists({
       where: {
