@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { Transform } from 'class-transformer';
 import {
+  IsEnum,
   IsISO8601,
   IsNotEmpty,
   IsOptional,
@@ -9,6 +10,7 @@ import {
   Matches,
   MaxLength,
 } from 'class-validator';
+import { EspecialidadeConsulta } from '../especialidade-consulta.enum.js';
 
 const FORMATO_CPF = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
 const FORMATO_DATA_HORA =
@@ -55,9 +57,8 @@ export const Especialidade = () =>
   applyDecorators(
     Transform(aparar),
     IsNotEmpty({ message: 'A especialidade é obrigatória.' }),
-    IsString({ message: 'A especialidade deve ser um texto.' }),
-    Length(3, 100, {
-      message: 'A especialidade deve ter entre 3 e 100 caracteres.',
+    IsEnum(EspecialidadeConsulta, {
+      message: 'A especialidade informada não está na lista de especialidades.',
     }),
   );
 

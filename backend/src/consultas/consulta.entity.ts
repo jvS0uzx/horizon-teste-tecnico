@@ -7,13 +7,14 @@ import {
 } from 'typeorm';
 import { ErroRegraDeNegocio, ErroValidacao } from '../comum/erros.js';
 import { mesmoDiaNaClinica } from './calendario.js';
+import { EspecialidadeConsulta } from './especialidade-consulta.enum.js';
 import { StatusConsulta } from './status-consulta.enum.js';
 
 export interface DadosDoAgendamento {
   nomePaciente: string;
   cpfPaciente: string;
   dataHora: Date;
-  especialidade: string;
+  especialidade: EspecialidadeConsulta;
   observacoes?: string | null;
 }
 
@@ -51,7 +52,7 @@ export class Consulta {
   dataHora: Date;
 
   @Column({ type: 'varchar', length: 100 })
-  especialidade: string;
+  especialidade: EspecialidadeConsulta;
 
   @Column({ type: 'varchar', length: 1000, nullable: true })
   observacoes: string | null;

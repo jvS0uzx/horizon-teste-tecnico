@@ -1,4 +1,5 @@
 import { AcoesPermitidas, Consulta } from '../consulta.entity.js';
+import { EspecialidadeConsulta } from '../especialidade-consulta.enum.js';
 import { StatusConsulta } from '../status-consulta.enum.js';
 
 export interface ConsultaResposta {
@@ -6,7 +7,7 @@ export interface ConsultaResposta {
   nomePaciente: string;
   cpfPaciente: string;
   dataHora: Date;
-  especialidade: string;
+  especialidade: EspecialidadeConsulta;
   observacoes: string | null;
   status: StatusConsulta;
   criadoEm: Date;
