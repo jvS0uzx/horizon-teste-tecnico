@@ -13,7 +13,7 @@ export function AcoesConsulta({ consulta, onEscolher }: AcoesConsultaProps) {
   );
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 lg:flex-nowrap">
       {botoes.map(({ acao, rotulo, variante, icone: Icone }) => (
         <Botao
           key={acao}
