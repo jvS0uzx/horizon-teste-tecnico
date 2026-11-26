@@ -1,8 +1,10 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import type { FiltrosDaListagem } from '../api/consultas.ts';
 import { Botao } from '../componentes/Botao.tsx';
 import { Campo, ESTILO_DE_ENTRADA } from '../componentes/Campo.tsx';
 import { FILTROS_VAZIOS } from './useConsultas.ts';
+
+const ESPERA_DA_BUSCA_MS = 300;
 
 interface FiltrosConsultasProps {
   filtros: FiltrosDaListagem;
@@ -13,19 +15,24 @@ export function FiltrosConsultas({
   filtros,
   onAplicar,
 }: FiltrosConsultasProps) {
-  const [rascunho, setRascunho] = useState(filtros);
+  const [busca, setBusca] = useState(filtros.busca);
 
-  function alterar(campo: keyof FiltrosDaListagem, valor: string) {
-    setRascunho((atual) => ({ ...atual, [campo]: valor }));
-  }
+  useEffect(() => {
+    const buscaAparada = busca.trim();
+    if (buscaAparada === filtros.busca) return;
+    const espera = setTimeout(
+      () => onAplicar({ ...filtros, busca: buscaAparada }),
+      ESPERA_DA_BUSCA_MS,
+    );
+    return () => clearTimeout(espera);
+  }, [busca, filtros, onAplicar]);
 
-  function aplicar(evento: FormEvent<HTMLFormElement>) {
-    evento.preventDefault();
-    onAplicar(rascunho);
+  function alterar(campo: 'status' | 'data', valor: string) {
+    onAplicar({ ...filtros, busca: busca.trim(), [campo]: valor });
   }
 
   function limpar() {
-    setRascunho(FILTROS_VAZIOS);
+    setBusca('');
     onAplicar(FILTROS_VAZIOS);
   }
 
@@ -33,24 +40,24 @@ export function FiltrosConsultas({
     <form
       role="search"
       noValidate
-      onSubmit={aplicar}
+      onSubmit={(evento) => evento.preventDefault()}
       className="grid gap-4 border border-grafite bg-branco p-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_auto] lg:items-end"
     >
       <Campo id="filtroBusca" rotulo="Nome ou CPF">
         <input
           id="filtroBusca"
           type="search"
-          value={rascunho.busca}
+          value={busca}
           maxLength={150}
           placeholder="Buscar por nome ou CPF"
           className={ESTILO_DE_ENTRADA}
-          onChange={(evento) => alterar('busca', evento.target.value)}
+          onChange={(evento) => setBusca(evento.target.value)}
         />
       </Campo>
       <Campo id="filtroStatus" rotulo="Status">
         <select
           id="filtroStatus"
-          value={rascunho.status}
+          value={filtros.status}
           className={ESTILO_DE_ENTRADA}
           onChange={(evento) => alterar('status', evento.target.value)}
         >
@@ -64,23 +71,18 @@ export function FiltrosConsultas({
         <input
           id="filtroData"
           type="date"
-          value={rascunho.data}
+          value={filtros.data}
           className={ESTILO_DE_ENTRADA}
           onChange={(evento) => alterar('data', evento.target.value)}
         />
       </Campo>
-      <div className="flex gap-2 sm:col-span-2 lg:col-span-1">
-        <Botao type="submit" className="flex-1 lg:flex-none">
-          Filtrar
-        </Botao>
-        <Botao
-          variante="secundario"
-          className="flex-1 lg:flex-none"
-          onClick={limpar}
-        >
-          Limpar
-        </Botao>
-      </div>
+      <Botao
+        variante="secundario"
+        className="sm:col-span-2 lg:col-span-1"
+        onClick={limpar}
+      >
+        Limpar
+      </Botao>
     </form>
   );
 }

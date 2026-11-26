@@ -74,7 +74,7 @@ export function ListaConsultas({
               </dd>
               <dt className="text-grafite">CPF</dt>
               <dd className="text-preto">{consulta.cpfPaciente}</dd>
-              <dt className="text-grafite">Motivo</dt>
+              <dt className="text-grafite">Especialidade</dt>
               <dd className="text-preto">{consulta.especialidade}</dd>
               {consulta.observacoes && (
                 <>
@@ -102,7 +102,7 @@ export function ListaConsultas({
               Data e hora
             </th>
             <th scope="col" className="px-4 py-3 font-semibold">
-              Especialidade / motivo
+              Especialidade
             </th>
             <th scope="col" className="px-4 py-3 font-semibold">
               Status

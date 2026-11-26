@@ -1,4 +1,5 @@
 import { paraIsoNaClinica } from '../utilitarios/datas.ts';
+import { ESPECIALIDADES } from './especialidades.ts';
 
 export interface CamposDaConsulta {
   nomePaciente: string;
@@ -59,13 +60,11 @@ export function validarConsulta(
       campos.dataHora && campos.dataHora === dataHoraOriginal
         ? undefined
         : validarDataHora(campos.dataHora, agora),
-    especialidade: validarTamanho(
-      campos.especialidade,
-      3,
-      100,
-      'A especialidade é obrigatória.',
-      'A especialidade deve ter entre 3 e 100 caracteres.',
-    ),
+    especialidade: !campos.especialidade
+      ? 'A especialidade é obrigatória.'
+      : ESPECIALIDADES.includes(campos.especialidade)
+        ? undefined
+        : 'A especialidade informada não está na lista de especialidades.',
     observacoes:
       campos.observacoes.trim().length > 1000
         ? 'As observações devem ter no máximo 1000 caracteres.'
