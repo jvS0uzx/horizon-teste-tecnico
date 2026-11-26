@@ -18,5 +18,6 @@ export const pipeValidacao = new ValidationPipe({
   whitelist: true,
   forbidNonWhitelisted: true,
   transform: true,
+  stopAtFirstError: true,
   exceptionFactory: (erros) => new BadRequestException(mensagensDe(erros)),
 });
