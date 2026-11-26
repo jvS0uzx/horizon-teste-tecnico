@@ -43,8 +43,19 @@ export interface DadosDaConsulta {
   observacoes: string | null;
 }
 
-export const listarConsultas = (pagina: number) =>
-  requisitar<PaginaDeConsultas>(`/consultas?pagina=${pagina}`);
+export interface FiltrosDaListagem {
+  busca: string;
+  status: StatusConsulta | '';
+  data: string;
+}
+
+export function listarConsultas(pagina: number, filtros: FiltrosDaListagem) {
+  const parametros = new URLSearchParams({ pagina: String(pagina) });
+  if (filtros.busca.trim()) parametros.set('busca', filtros.busca.trim());
+  if (filtros.status) parametros.set('status', filtros.status);
+  if (filtros.data) parametros.set('data', filtros.data);
+  return requisitar<PaginaDeConsultas>(`/consultas?${parametros}`);
+}
 
 export const agendarConsulta = (dados: DadosDaConsulta) =>
   requisitar<Consulta>('/consultas', 'POST', dados);

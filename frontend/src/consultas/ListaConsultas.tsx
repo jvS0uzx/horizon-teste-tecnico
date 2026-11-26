@@ -9,6 +9,7 @@ import { SeloStatus } from './SeloStatus.tsx';
 interface ListaConsultasProps {
   consultas: Consulta[];
   carregando: boolean;
+  filtrando: boolean;
   erro?: string[];
   onTentarNovamente: () => void;
   onEscolherAcao: (consulta: Consulta, acao: Acao) => void;
@@ -17,6 +18,7 @@ interface ListaConsultasProps {
 export function ListaConsultas({
   consultas,
   carregando,
+  filtrando,
   erro,
   onTentarNovamente,
   onEscolherAcao,
@@ -40,9 +42,15 @@ export function ListaConsultas({
   if (consultas.length === 0) {
     return (
       <div className="border border-dashed border-grafite bg-branco px-6 py-12 text-center">
-        <p className="font-semibold text-preto">Nenhuma consulta agendada.</p>
+        <p className="font-semibold text-preto">
+          {filtrando
+            ? 'Nenhuma consulta encontrada com esses filtros.'
+            : 'Nenhuma consulta agendada.'}
+        </p>
         <p className="mt-1 text-sm text-grafite">
-          Use “Nova consulta” para agendar a primeira.
+          {filtrando
+            ? 'Ajuste ou limpe os filtros para ver outras consultas.'
+            : 'Use “Nova consulta” para agendar a primeira.'}
         </p>
       </div>
     );

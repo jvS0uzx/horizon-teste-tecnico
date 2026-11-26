@@ -3,7 +3,9 @@ import type { Consulta } from './api/consultas.ts';
 import { Botao } from './componentes/Botao.tsx';
 import { Cabecalho } from './componentes/Cabecalho.tsx';
 import { Dialogo } from './componentes/Dialogo.tsx';
+import { Paginacao } from './componentes/Paginacao.tsx';
 import { ConfirmarAcao } from './consultas/ConfirmarAcao.tsx';
+import { FiltrosConsultas } from './consultas/FiltrosConsultas.tsx';
 import { FormularioConsulta } from './consultas/FormularioConsulta.tsx';
 import { FormularioRemarcacao } from './consultas/FormularioRemarcacao.tsx';
 import { ListaConsultas } from './consultas/ListaConsultas.tsx';
@@ -28,7 +30,17 @@ function tituloDe(dialogo: DialogoAberto): string {
 }
 
 export function App() {
-  const { consultas, carregando, erro, recarregar } = useConsultas();
+  const {
+    consultas,
+    meta,
+    filtros,
+    filtrando,
+    carregando,
+    erro,
+    recarregar,
+    irParaPagina,
+    aplicarFiltros,
+  } = useConsultas();
   const [dialogo, setDialogo] = useState<DialogoAberto>();
   const [aviso, setAviso] = useState<string>();
 
@@ -113,15 +125,25 @@ export function App() {
             {aviso}
           </p>
         )}
+        <FiltrosConsultas filtros={filtros} onAplicar={aplicarFiltros} />
         <ListaConsultas
           consultas={consultas}
           carregando={carregando}
+          filtrando={filtrando}
           erro={erro}
           onTentarNovamente={recarregar}
           onEscolherAcao={(consulta, acao) =>
             setDialogo({ tipo: acao, consulta })
           }
         />
+        {meta && !erro && (
+          <Paginacao
+            pagina={meta.pagina}
+            totalPaginas={meta.totalPaginas}
+            total={meta.total}
+            onIrPara={irParaPagina}
+          />
+        )}
       </main>
 
       <Dialogo
