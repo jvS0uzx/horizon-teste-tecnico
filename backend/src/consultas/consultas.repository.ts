@@ -4,7 +4,7 @@ import { Not, QueryFailedError, Repository } from 'typeorm';
 import { Consulta } from './consulta.entity.js';
 import { StatusConsulta } from './status-consulta.enum.js';
 
-const VIOLACAO_DE_UNICIDADE = '23505';
+const INDICE_HORARIO_OCUPADO = 'uq_consultas_cpf_data_hora_ativa';
 
 @Injectable()
 export class ConsultasRepository {
@@ -42,7 +42,8 @@ export class ConsultasRepository {
   ehHorarioOcupado(erro: unknown): boolean {
     return (
       erro instanceof QueryFailedError &&
-      (erro.driverError as { code?: string }).code === VIOLACAO_DE_UNICIDADE
+      (erro.driverError as { constraint?: string }).constraint ===
+        INDICE_HORARIO_OCUPADO
     );
   }
 }

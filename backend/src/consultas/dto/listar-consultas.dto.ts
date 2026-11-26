@@ -6,6 +6,9 @@ const MENSAGEM_PAGINA =
 const MENSAGEM_LIMITE = 'O limite deve ser um número inteiro entre 1 e 100.';
 
 export class ListarConsultasDto {
+  @Max(Number.MAX_SAFE_INTEGER, {
+    message: 'A página informada é grande demais.',
+  })
   @Min(1, { message: MENSAGEM_PAGINA })
   @IsInt({ message: MENSAGEM_PAGINA })
   @Type(() => Number)
