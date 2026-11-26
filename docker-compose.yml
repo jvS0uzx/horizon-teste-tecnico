@@ -17,5 +17,31 @@ services:
       timeout: 5s
       retries: 10
 
+  api:
+    build: ./backend
+    environment:
+      API_PORTA: '3000'
+      ORIGEM_FRONTEND: http://localhost:${PORTA_WEB:-5173}
+      BANCO_HOST: banco
+      BANCO_PORTA: '5432'
+      BANCO_USUARIO: ${BANCO_USUARIO}
+      BANCO_SENHA: ${BANCO_SENHA}
+      BANCO_NOME: ${BANCO_NOME}
+    ports:
+      - '${PORTA_API:-3000}:3000'
+    depends_on:
+      banco:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:${PORTA_API:-3000}
+    ports:
+      - '${PORTA_WEB:-5173}:80'
+    depends_on:
+      - api
+
 volumes:
   dados-banco:
