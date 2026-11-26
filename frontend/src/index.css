@@ -1,0 +1,16 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-*: initial;
+  --color-amarelo: #fbe509;
+  --color-preto: #000000;
+  --color-grafite: #141414;
+  --color-cinza-claro: #f7f7f7;
+  --color-branco: #ffffff;
+}
+
+@layer base {
+  body {
+    @apply bg-cinza-claro text-grafite antialiased;
+  }
+}
