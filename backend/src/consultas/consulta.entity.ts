@@ -17,6 +17,8 @@ export interface DadosDoAgendamento {
   observacoes?: string | null;
 }
 
+export type DadosDaEdicao = Partial<DadosDoAgendamento>;
+
 export interface AcoesPermitidas {
   editar: boolean;
   remarcar: boolean;
@@ -27,12 +29,12 @@ export interface AcoesPermitidas {
 
 type StatusFinal = Exclude<StatusConsulta, StatusConsulta.Agendada>;
 
-const MENSAGEM_STATUS_FINAL: Record<StatusFinal, string> = {
-  [StatusConsulta.Realizada]:
-    'Esta consulta já foi realizada e não pode mudar de status.',
-  [StatusConsulta.Cancelada]:
-    'Esta consulta foi cancelada e não pode mudar de status.',
+const SITUACAO_FINAL: Record<StatusFinal, string> = {
+  [StatusConsulta.Realizada]: 'Esta consulta já foi realizada',
+  [StatusConsulta.Cancelada]: 'Esta consulta foi cancelada',
 };
+
+const AGENDAR_NO_PASSADO = 'Não é possível agendar uma consulta no passado.';
 
 @Entity('consultas')
 export class Consulta {
@@ -69,18 +71,14 @@ export class Consulta {
   atualizadoEm: Date;
 
   static agendar(dados: DadosDoAgendamento, agora: Date): Consulta {
-    const dataHora = Consulta.semSegundos(dados.dataHora);
-
-    if (dataHora <= agora) {
-      throw new ErroValidacao(
-        'Não é possível agendar uma consulta no passado.',
-      );
-    }
-
     const consulta = new Consulta();
+    consulta.dataHora = Consulta.exigirFutura(
+      dados.dataHora,
+      agora,
+      AGENDAR_NO_PASSADO,
+    );
     consulta.nomePaciente = dados.nomePaciente;
     consulta.cpfPaciente = dados.cpfPaciente;
-    consulta.dataHora = dataHora;
     consulta.especialidade = dados.especialidade;
     consulta.observacoes = dados.observacoes ?? null;
     consulta.status = StatusConsulta.Agendada;
@@ -98,6 +96,37 @@ export class Consulta {
     };
   }
 
+  editar(dados: DadosDaEdicao, agora: Date): void {
+    this.exigirAgendada('ser editada');
+
+    if (dados.dataHora) {
+      const dataHora = Consulta.semSegundos(dados.dataHora);
+      if (dataHora.getTime() !== this.dataHora.getTime()) {
+        this.dataHora = Consulta.exigirFutura(
+          dataHora,
+          agora,
+          AGENDAR_NO_PASSADO,
+        );
+      }
+    }
+
+    this.nomePaciente = dados.nomePaciente ?? this.nomePaciente;
+    this.cpfPaciente = dados.cpfPaciente ?? this.cpfPaciente;
+    this.especialidade = dados.especialidade ?? this.especialidade;
+    if (dados.observacoes !== undefined) {
+      this.observacoes = dados.observacoes;
+    }
+  }
+
+  remarcar(novaDataHora: Date, agora: Date): void {
+    this.exigirAgendada('ser remarcada');
+    this.dataHora = Consulta.exigirFutura(
+      novaDataHora,
+      agora,
+      'Não é possível remarcar para uma data e hora no passado.',
+    );
+  }
+
   alterarStatus(novoStatus: StatusConsulta, agora: Date): void {
     switch (novoStatus) {
       case StatusConsulta.Realizada:
@@ -112,7 +141,7 @@ export class Consulta {
   }
 
   realizar(agora: Date): void {
-    this.exigirAgendada();
+    this.exigirAgendada('mudar de status');
 
     if (!mesmoDiaNaClinica(this.dataHora, agora)) {
       throw new ErroRegraDeNegocio(
@@ -124,14 +153,24 @@ export class Consulta {
   }
 
   cancelar(): void {
-    this.exigirAgendada();
+    this.exigirAgendada('mudar de status');
     this.status = StatusConsulta.Cancelada;
   }
 
-  private exigirAgendada(): void {
+  private exigirAgendada(acao: string): void {
     if (this.status !== StatusConsulta.Agendada) {
-      throw new ErroRegraDeNegocio(MENSAGEM_STATUS_FINAL[this.status]);
+      throw new ErroRegraDeNegocio(
+        `${SITUACAO_FINAL[this.status]} e não pode ${acao}.`,
+      );
     }
+  }
+
+  private static exigirFutura(data: Date, agora: Date, mensagem: string): Date {
+    const dataHora = Consulta.semSegundos(data);
+    if (dataHora <= agora) {
+      throw new ErroValidacao(mensagem);
+    }
+    return dataHora;
   }
 
   private static semSegundos(data: Date): Date {

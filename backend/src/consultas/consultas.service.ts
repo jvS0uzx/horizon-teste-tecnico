@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -12,7 +13,9 @@ import {
   paraResposta,
 } from './dto/consulta-resposta.js';
 import { CriarConsultaDto } from './dto/criar-consulta.dto.js';
+import { EditarConsultaDto } from './dto/editar-consulta.dto.js';
 import { ListarConsultasDto } from './dto/listar-consultas.dto.js';
+import { RemarcarConsultaDto } from './dto/remarcar-consulta.dto.js';
 
 const MENSAGEM_HORARIO_OCUPADO =
   'Já existe uma consulta para este CPF nesta data e hora.';
@@ -47,6 +50,41 @@ export class ConsultasService {
     return paraResposta(await this.salvar(consulta), agora);
   }
 
+  async editar(
+    id: string,
+    dados: EditarConsultaDto,
+  ): Promise<ConsultaResposta> {
+    if (Object.values(dados).every((valor) => valor === undefined)) {
+      throw new BadRequestException('Informe ao menos um campo para editar.');
+    }
+    const agora = new Date();
+    const consulta = await this.buscarConsulta(id);
+    consulta.editar(
+      {
+        ...dados,
+        dataHora: dados.dataHora ? new Date(dados.dataHora) : undefined,
+      },
+      agora,
+    );
+    await this.exigirHorarioLivre(consulta);
+    return paraResposta(await this.salvar(consulta), agora);
+  }
+
+  async remarcar(
+    id: string,
+    { dataHora }: RemarcarConsultaDto,
+  ): Promise<ConsultaResposta> {
+    const agora = new Date();
+    const consulta = await this.buscarConsulta(id);
+    consulta.remarcar(new Date(dataHora), agora);
+    await this.exigirHorarioLivre(consulta);
+    return paraResposta(await this.salvar(consulta), agora);
+  }
+
+  async excluir(id: string): Promise<void> {
+    await this.repositorio.remover(await this.buscarConsulta(id));
+  }
+
   async alterarStatus(
     id: string,
     { status }: AlterarStatusDto,
@@ -69,6 +107,7 @@ export class ConsultasService {
     const ocupado = await this.repositorio.existeAtivaNoHorario(
       consulta.cpfPaciente,
       consulta.dataHora,
+      consulta.id,
     );
     if (ocupado) {
       throw new ConflictException(MENSAGEM_HORARIO_OCUPADO);

@@ -17,6 +17,10 @@ export class ConsultasRepository {
     return this.repositorio.save(consulta);
   }
 
+  async remover(consulta: Consulta): Promise<void> {
+    await this.repositorio.remove(consulta);
+  }
+
   buscarPorId(id: string): Promise<Consulta | null> {
     return this.repositorio.findOneBy({ id });
   }
@@ -29,12 +33,17 @@ export class ConsultasRepository {
     });
   }
 
-  existeAtivaNoHorario(cpfPaciente: string, dataHora: Date): Promise<boolean> {
+  existeAtivaNoHorario(
+    cpfPaciente: string,
+    dataHora: Date,
+    ignorarId?: string,
+  ): Promise<boolean> {
     return this.repositorio.exists({
       where: {
         cpfPaciente,
         dataHora,
         status: Not(StatusConsulta.Cancelada),
+        ...(ignorarId ? { id: Not(ignorarId) } : {}),
       },
     });
   }
