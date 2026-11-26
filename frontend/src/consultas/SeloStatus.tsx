@@ -7,11 +7,11 @@ const APARENCIA: Record<StatusConsulta, { rotulo: string; estilo: string }> = {
   },
   REALIZADA: {
     rotulo: 'Realizada',
-    estilo: 'border-preto bg-preto text-branco',
+    estilo: 'border-verde bg-verde text-branco',
   },
   CANCELADA: {
     rotulo: 'Cancelada',
-    estilo: 'border-grafite bg-branco text-grafite',
+    estilo: 'border-vermelho bg-vermelho text-branco',
   },
 };
 

@@ -1,16 +1,25 @@
 import { useEffect, useState } from 'react';
+import type { Consulta, StatusFinal } from './api/consultas.ts';
 import { Botao } from './componentes/Botao.tsx';
 import { Cabecalho } from './componentes/Cabecalho.tsx';
 import { Dialogo } from './componentes/Dialogo.tsx';
+import { ConfirmarStatus } from './consultas/ConfirmarStatus.tsx';
 import { FormularioConsulta } from './consultas/FormularioConsulta.tsx';
 import { ListaConsultas } from './consultas/ListaConsultas.tsx';
+import { TEXTOS_STATUS } from './consultas/textosStatus.ts';
 import { useConsultas } from './consultas/useConsultas.ts';
 
 const DURACAO_DO_AVISO_MS = 5000;
 
+interface MudancaDeStatus {
+  consulta: Consulta;
+  status: StatusFinal;
+}
+
 export function App() {
   const { consultas, carregando, erro, recarregar } = useConsultas();
   const [formularioAberto, setFormularioAberto] = useState(false);
+  const [mudancaDeStatus, setMudancaDeStatus] = useState<MudancaDeStatus>();
   const [aviso, setAviso] = useState<string>();
 
   useEffect(() => {
@@ -22,9 +31,10 @@ export function App() {
     return () => clearTimeout(temporizador);
   }, [aviso]);
 
-  function aoAgendar() {
+  function concluir(mensagem: string) {
     setFormularioAberto(false);
-    setAviso('Consulta agendada com sucesso.');
+    setMudancaDeStatus(undefined);
+    setAviso(mensagem);
     recarregar();
   }
 
@@ -61,6 +71,9 @@ export function App() {
           carregando={carregando}
           erro={erro}
           onTentarNovamente={recarregar}
+          onAlterarStatus={(consulta, status) =>
+            setMudancaDeStatus({ consulta, status })
+          }
         />
       </main>
 
@@ -70,9 +83,26 @@ export function App() {
         onFechar={() => setFormularioAberto(false)}
       >
         <FormularioConsulta
-          onAgendada={aoAgendar}
+          onAgendada={() => concluir('Consulta agendada com sucesso.')}
           onCancelar={() => setFormularioAberto(false)}
         />
+      </Dialogo>
+
+      <Dialogo
+        aberto={Boolean(mudancaDeStatus)}
+        titulo={
+          mudancaDeStatus ? TEXTOS_STATUS[mudancaDeStatus.status].titulo : ''
+        }
+        onFechar={() => setMudancaDeStatus(undefined)}
+      >
+        {mudancaDeStatus && (
+          <ConfirmarStatus
+            consulta={mudancaDeStatus.consulta}
+            status={mudancaDeStatus.status}
+            onConcluido={concluir}
+            onVoltar={() => setMudancaDeStatus(undefined)}
+          />
+        )}
       </Dialogo>
     </div>
   );

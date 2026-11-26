@@ -1,5 +1,4 @@
 const FUSO_DA_CLINICA = 'America/Sao_Paulo';
-const DESLOCAMENTO_DA_CLINICA = '-03:00';
 
 const formatadorDeData = new Intl.DateTimeFormat('pt-BR', {
   timeZone: FUSO_DA_CLINICA,
@@ -11,8 +10,31 @@ const formatadorDeHora = new Intl.DateTimeFormat('pt-BR', {
   timeStyle: 'short',
 });
 
+const formatadorDeCampo = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_DA_CLINICA,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+
+const formatadorDeDeslocamento = new Intl.DateTimeFormat('en-US', {
+  timeZone: FUSO_DA_CLINICA,
+  timeZoneName: 'longOffset',
+});
+
+function deslocamentoNaClinica(instante: Date): string {
+  const nome = formatadorDeDeslocamento
+    .formatToParts(instante)
+    .find((parte) => parte.type === 'timeZoneName')?.value;
+  return nome && nome !== 'GMT' ? nome.replace('GMT', '') : '+00:00';
+}
+
 export function paraIsoNaClinica(valorDoCampo: string): string {
-  return `${valorDoCampo}:00${DESLOCAMENTO_DA_CLINICA}`;
+  const deslocamento = deslocamentoNaClinica(new Date(`${valorDoCampo}:00Z`));
+  return `${valorDoCampo}:00${deslocamento}`;
 }
 
 export function formatarDataHora(iso: string): string {
@@ -21,13 +43,10 @@ export function formatarDataHora(iso: string): string {
 }
 
 export function agoraParaCampo(agora = new Date()): string {
-  const partes = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: FUSO_DA_CLINICA,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(agora);
-  return partes.replace(' ', 'T');
+  const partes = Object.fromEntries(
+    formatadorDeCampo
+      .formatToParts(agora)
+      .map((parte) => [parte.type, parte.value]),
+  );
+  return `${partes.year}-${partes.month}-${partes.day}T${partes.hour}:${partes.minute}`;
 }

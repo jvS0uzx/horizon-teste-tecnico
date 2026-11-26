@@ -1,7 +1,8 @@
-import type { Consulta } from '../api/consultas.ts';
+import type { Consulta, StatusFinal } from '../api/consultas.ts';
 import { Alerta } from '../componentes/Alerta.tsx';
 import { Botao } from '../componentes/Botao.tsx';
 import { formatarDataHora } from '../utilitarios/datas.ts';
+import { AcoesConsulta } from './AcoesConsulta.tsx';
 import { SeloStatus } from './SeloStatus.tsx';
 
 interface ListaConsultasProps {
@@ -9,6 +10,7 @@ interface ListaConsultasProps {
   carregando: boolean;
   erro?: string[];
   onTentarNovamente: () => void;
+  onAlterarStatus: (consulta: Consulta, status: StatusFinal) => void;
 }
 
 export function ListaConsultas({
@@ -16,6 +18,7 @@ export function ListaConsultas({
   carregando,
   erro,
   onTentarNovamente,
+  onAlterarStatus,
 }: ListaConsultasProps) {
   if (erro) {
     return (
@@ -73,6 +76,12 @@ export function ListaConsultas({
                 </>
               )}
             </dl>
+            <div className="mt-4 empty:hidden">
+              <AcoesConsulta
+                consulta={consulta}
+                onAlterarStatus={onAlterarStatus}
+              />
+            </div>
           </li>
         ))}
       </ul>
@@ -91,6 +100,9 @@ export function ListaConsultas({
             </th>
             <th scope="col" className="px-4 py-3 font-semibold">
               Status
+            </th>
+            <th scope="col" className="px-4 py-3 font-semibold">
+              Ações
             </th>
           </tr>
         </thead>
@@ -116,6 +128,12 @@ export function ListaConsultas({
               </td>
               <td className="px-4 py-3">
                 <SeloStatus status={consulta.status} />
+              </td>
+              <td className="px-4 py-3">
+                <AcoesConsulta
+                  consulta={consulta}
+                  onAlterarStatus={onAlterarStatus}
+                />
               </td>
             </tr>
           ))}

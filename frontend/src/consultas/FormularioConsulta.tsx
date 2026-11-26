@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { mensagensDoErro } from '../api/cliente.ts';
-import { agendarConsulta, type Consulta } from '../api/consultas.ts';
+import { agendarConsulta } from '../api/consultas.ts';
 import { Alerta } from '../componentes/Alerta.tsx';
 import { Botao } from '../componentes/Botao.tsx';
 import { Campo, ESTILO_DE_ENTRADA } from '../componentes/Campo.tsx';
@@ -21,7 +21,7 @@ const CAMPOS_VAZIOS: CamposDaConsulta = {
 };
 
 interface FormularioConsultaProps {
-  onAgendada: (consulta: Consulta) => void;
+  onAgendada: () => void;
   onCancelar: () => void;
 }
 
@@ -62,14 +62,14 @@ export function FormularioConsulta({
 
     setEnviando(true);
     try {
-      const consulta = await agendarConsulta({
+      await agendarConsulta({
         nomePaciente: campos.nomePaciente.trim(),
         cpfPaciente: campos.cpfPaciente,
         dataHora: paraIsoNaClinica(campos.dataHora),
         especialidade: campos.especialidade.trim(),
         observacoes: campos.observacoes.trim() || undefined,
       });
-      onAgendada(consulta);
+      onAgendada();
     } catch (falha) {
       setErrosDoServidor(mensagensDoErro(falha));
     } finally {

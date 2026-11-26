@@ -7,6 +7,8 @@
   --color-grafite: #141414;
   --color-cinza-claro: #f7f7f7;
   --color-branco: #ffffff;
+  --color-verde: #15803d;
+  --color-vermelho: #b91c1c;
 }
 
 @layer base {
