@@ -1,10 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, QueryFailedError, Repository } from 'typeorm';
+import { Brackets, Not, QueryFailedError, Repository } from 'typeorm';
+import { FUSO_DA_CLINICA } from './calendario.js';
 import { Consulta } from './consulta.entity.js';
 import { StatusConsulta } from './status-consulta.enum.js';
 
 const INDICE_HORARIO_OCUPADO = 'uq_consultas_cpf_data_hora_ativa';
+
+export interface FiltroDaListagem {
+  pagina: number;
+  limite: number;
+  busca?: string;
+  status?: StatusConsulta;
+  data?: string;
+}
+
+const comoTextoLiteral = (texto: string) => texto.replace(/[\\%_]/g, '\\$&');
 
 @Injectable()
 export class ConsultasRepository {
@@ -25,12 +36,49 @@ export class ConsultasRepository {
     return this.repositorio.findOneBy({ id });
   }
 
-  listar(pagina: number, limite: number): Promise<[Consulta[], number]> {
-    return this.repositorio.findAndCount({
-      order: { dataHora: 'ASC', id: 'ASC' },
-      skip: (pagina - 1) * limite,
-      take: limite,
-    });
+  listar({
+    pagina,
+    limite,
+    busca,
+    status,
+    data,
+  }: FiltroDaListagem): Promise<[Consulta[], number]> {
+    const consulta = this.repositorio
+      .createQueryBuilder('consulta')
+      .orderBy('consulta.dataHora', 'ASC')
+      .addOrderBy('consulta.id', 'ASC')
+      .skip((pagina - 1) * limite)
+      .take(limite);
+
+    if (busca) {
+      const digitos = busca.replace(/\D/g, '');
+      consulta.andWhere(
+        new Brackets((condicao) => {
+          condicao.where('consulta.nomePaciente ILIKE :nome', {
+            nome: `%${comoTextoLiteral(busca)}%`,
+          });
+          if (digitos) {
+            condicao.orWhere(
+              "translate(consulta.cpfPaciente, '.-', '') LIKE :digitos",
+              { digitos: `%${digitos}%` },
+            );
+          }
+        }),
+      );
+    }
+
+    if (status) {
+      consulta.andWhere('consulta.status = :status', { status });
+    }
+
+    if (data) {
+      consulta.andWhere(
+        "consulta.dataHora >= CAST(:data AS timestamp) AT TIME ZONE :fuso AND consulta.dataHora < (CAST(:data AS timestamp) + interval '1 day') AT TIME ZONE :fuso",
+        { data, fuso: FUSO_DA_CLINICA },
+      );
+    }
+
+    return consulta.getManyAndCount();
   }
 
   existeAtivaNoHorario(

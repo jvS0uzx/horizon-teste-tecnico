@@ -24,11 +24,9 @@ const MENSAGEM_HORARIO_OCUPADO =
 export class ConsultasService {
   constructor(private readonly repositorio: ConsultasRepository) {}
 
-  async listar({
-    pagina,
-    limite,
-  }: ListarConsultasDto): Promise<PaginaDeConsultas> {
-    const [consultas, total] = await this.repositorio.listar(pagina, limite);
+  async listar(filtro: ListarConsultasDto): Promise<PaginaDeConsultas> {
+    const { pagina, limite } = filtro;
+    const [consultas, total] = await this.repositorio.listar(filtro);
     const agora = new Date();
     return {
       dados: consultas.map((consulta) => paraResposta(consulta, agora)),
