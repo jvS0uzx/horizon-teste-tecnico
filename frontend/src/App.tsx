@@ -1,25 +1,35 @@
 import { useEffect, useState } from 'react';
-import type { Consulta, StatusFinal } from './api/consultas.ts';
+import type { Consulta } from './api/consultas.ts';
 import { Botao } from './componentes/Botao.tsx';
 import { Cabecalho } from './componentes/Cabecalho.tsx';
 import { Dialogo } from './componentes/Dialogo.tsx';
-import { ConfirmarStatus } from './consultas/ConfirmarStatus.tsx';
+import { ConfirmarAcao } from './consultas/ConfirmarAcao.tsx';
 import { FormularioConsulta } from './consultas/FormularioConsulta.tsx';
+import { FormularioRemarcacao } from './consultas/FormularioRemarcacao.tsx';
 import { ListaConsultas } from './consultas/ListaConsultas.tsx';
-import { TEXTOS_STATUS } from './consultas/textosStatus.ts';
+import { CONFIRMACOES, type Acao } from './consultas/acoes.ts';
 import { useConsultas } from './consultas/useConsultas.ts';
 
 const DURACAO_DO_AVISO_MS = 5000;
 
-interface MudancaDeStatus {
-  consulta: Consulta;
-  status: StatusFinal;
+type DialogoAberto = { tipo: 'NOVA' } | { tipo: Acao; consulta: Consulta };
+
+function tituloDe(dialogo: DialogoAberto): string {
+  switch (dialogo.tipo) {
+    case 'NOVA':
+      return 'Nova consulta';
+    case 'EDITAR':
+      return 'Editar consulta';
+    case 'REMARCAR':
+      return 'Remarcar consulta';
+    default:
+      return CONFIRMACOES[dialogo.tipo].titulo;
+  }
 }
 
 export function App() {
   const { consultas, carregando, erro, recarregar } = useConsultas();
-  const [formularioAberto, setFormularioAberto] = useState(false);
-  const [mudancaDeStatus, setMudancaDeStatus] = useState<MudancaDeStatus>();
+  const [dialogo, setDialogo] = useState<DialogoAberto>();
   const [aviso, setAviso] = useState<string>();
 
   useEffect(() => {
@@ -31,11 +41,46 @@ export function App() {
     return () => clearTimeout(temporizador);
   }, [aviso]);
 
+  function fechar() {
+    setDialogo(undefined);
+  }
+
   function concluir(mensagem: string) {
-    setFormularioAberto(false);
-    setMudancaDeStatus(undefined);
+    fechar();
     setAviso(mensagem);
     recarregar();
+  }
+
+  function conteudoDe(aberto: DialogoAberto) {
+    if (aberto.tipo === 'NOVA') {
+      return <FormularioConsulta onSalvo={concluir} onCancelar={fechar} />;
+    }
+    if (aberto.tipo === 'EDITAR') {
+      return (
+        <FormularioConsulta
+          consulta={aberto.consulta}
+          onSalvo={concluir}
+          onCancelar={fechar}
+        />
+      );
+    }
+    if (aberto.tipo === 'REMARCAR') {
+      return (
+        <FormularioRemarcacao
+          consulta={aberto.consulta}
+          onSalvo={concluir}
+          onCancelar={fechar}
+        />
+      );
+    }
+    return (
+      <ConfirmarAcao
+        consulta={aberto.consulta}
+        acao={aberto.tipo}
+        onConcluida={concluir}
+        onVoltar={fechar}
+      />
+    );
   }
 
   return (
@@ -53,7 +98,9 @@ export function App() {
             </h1>
             <div className="mt-5 h-1.5 w-20 bg-amarelo" />
           </div>
-          <Botao onClick={() => setFormularioAberto(true)}>Nova consulta</Botao>
+          <Botao onClick={() => setDialogo({ tipo: 'NOVA' })}>
+            Nova consulta
+          </Botao>
         </div>
       </section>
 
@@ -71,38 +118,18 @@ export function App() {
           carregando={carregando}
           erro={erro}
           onTentarNovamente={recarregar}
-          onAlterarStatus={(consulta, status) =>
-            setMudancaDeStatus({ consulta, status })
+          onEscolherAcao={(consulta, acao) =>
+            setDialogo({ tipo: acao, consulta })
           }
         />
       </main>
 
       <Dialogo
-        aberto={formularioAberto}
-        titulo="Nova consulta"
-        onFechar={() => setFormularioAberto(false)}
+        aberto={Boolean(dialogo)}
+        titulo={dialogo ? tituloDe(dialogo) : ''}
+        onFechar={fechar}
       >
-        <FormularioConsulta
-          onAgendada={() => concluir('Consulta agendada com sucesso.')}
-          onCancelar={() => setFormularioAberto(false)}
-        />
-      </Dialogo>
-
-      <Dialogo
-        aberto={Boolean(mudancaDeStatus)}
-        titulo={
-          mudancaDeStatus ? TEXTOS_STATUS[mudancaDeStatus.status].titulo : ''
-        }
-        onFechar={() => setMudancaDeStatus(undefined)}
-      >
-        {mudancaDeStatus && (
-          <ConfirmarStatus
-            consulta={mudancaDeStatus.consulta}
-            status={mudancaDeStatus.status}
-            onConcluido={concluir}
-            onVoltar={() => setMudancaDeStatus(undefined)}
-          />
-        )}
+        {dialogo && conteudoDe(dialogo)}
       </Dialogo>
     </div>
   );

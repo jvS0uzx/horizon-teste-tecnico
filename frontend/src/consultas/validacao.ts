@@ -25,17 +25,22 @@ function validarTamanho(
   return undefined;
 }
 
-function validarDataHora(valor: string, agora: Date): string | undefined {
+const AGENDAR_NO_PASSADO = 'Não é possível agendar uma consulta no passado.';
+
+export function validarDataHora(
+  valor: string,
+  agora: Date,
+  mensagemDePassado = AGENDAR_NO_PASSADO,
+): string | undefined {
   if (!valor) return 'A data e hora da consulta é obrigatória.';
-  if (new Date(paraIsoNaClinica(valor)) <= agora) {
-    return 'Não é possível agendar uma consulta no passado.';
-  }
+  if (new Date(paraIsoNaClinica(valor)) <= agora) return mensagemDePassado;
   return undefined;
 }
 
 export function validarConsulta(
   campos: CamposDaConsulta,
   agora = new Date(),
+  dataHoraOriginal?: string,
 ): ErrosDaConsulta {
   const erros: ErrosDaConsulta = {
     nomePaciente: validarTamanho(
@@ -50,7 +55,10 @@ export function validarConsulta(
       : FORMATO_CPF.test(campos.cpfPaciente)
         ? undefined
         : 'O CPF do paciente deve estar no formato 000.000.000-00.',
-    dataHora: validarDataHora(campos.dataHora, agora),
+    dataHora:
+      campos.dataHora && campos.dataHora === dataHoraOriginal
+        ? undefined
+        : validarDataHora(campos.dataHora, agora),
     especialidade: validarTamanho(
       campos.especialidade,
       3,

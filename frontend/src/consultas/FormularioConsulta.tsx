@@ -1,37 +1,68 @@
 import { useState, type FormEvent } from 'react';
 import { mensagensDoErro } from '../api/cliente.ts';
-import { agendarConsulta } from '../api/consultas.ts';
+import {
+  agendarConsulta,
+  editarConsulta,
+  type Consulta,
+  type DadosDaConsulta,
+} from '../api/consultas.ts';
 import { Alerta } from '../componentes/Alerta.tsx';
 import { Botao } from '../componentes/Botao.tsx';
 import { Campo, ESTILO_DE_ENTRADA } from '../componentes/Campo.tsx';
 import { mascararCpf } from '../utilitarios/cpf.ts';
-import { agoraParaCampo, paraIsoNaClinica } from '../utilitarios/datas.ts';
+import { paraCampo, paraIsoNaClinica } from '../utilitarios/datas.ts';
 import {
   validarConsulta,
   type CamposDaConsulta,
   type ErrosDaConsulta,
 } from './validacao.ts';
 
-const CAMPOS_VAZIOS: CamposDaConsulta = {
-  nomePaciente: '',
-  cpfPaciente: '',
-  dataHora: '',
-  especialidade: '',
-  observacoes: '',
-};
+function camposDe(consulta?: Consulta): CamposDaConsulta {
+  return {
+    nomePaciente: consulta?.nomePaciente ?? '',
+    cpfPaciente: consulta?.cpfPaciente ?? '',
+    dataHora: consulta ? paraCampo(new Date(consulta.dataHora)) : '',
+    especialidade: consulta?.especialidade ?? '',
+    observacoes: consulta?.observacoes ?? '',
+  };
+}
+
+function paraEnvio(campos: CamposDaConsulta): DadosDaConsulta {
+  return {
+    nomePaciente: campos.nomePaciente.trim(),
+    cpfPaciente: campos.cpfPaciente,
+    dataHora: paraIsoNaClinica(campos.dataHora),
+    especialidade: campos.especialidade.trim(),
+    observacoes: campos.observacoes.trim() || null,
+  };
+}
+
+function apenasAlterados(
+  dados: DadosDaConsulta,
+  originais: DadosDaConsulta,
+): Partial<DadosDaConsulta> {
+  return Object.fromEntries(
+    Object.entries(dados).filter(
+      ([campo, valor]) => originais[campo as keyof DadosDaConsulta] !== valor,
+    ),
+  );
+}
 
 interface FormularioConsultaProps {
-  onAgendada: () => void;
+  consulta?: Consulta;
+  onSalvo: (mensagem: string) => void;
   onCancelar: () => void;
 }
 
 export function FormularioConsulta({
-  onAgendada,
+  consulta,
+  onSalvo,
   onCancelar,
 }: FormularioConsultaProps) {
-  const [campos, setCampos] = useState(CAMPOS_VAZIOS);
+  const [originais] = useState(() => camposDe(consulta));
+  const [campos, setCampos] = useState(originais);
   const [erros, setErros] = useState<ErrosDaConsulta>({});
-  const [errosDoServidor, setErrosDoServidor] = useState<string[]>([]);
+  const [errosGerais, setErrosGerais] = useState<string[]>([]);
   const [enviando, setEnviando] = useState(false);
 
   function alterar(campo: keyof CamposDaConsulta, valor: string) {
@@ -53,33 +84,47 @@ export function FormularioConsulta({
     };
   }
 
+  async function salvar(): Promise<string | undefined> {
+    if (!consulta) {
+      await agendarConsulta(paraEnvio(campos));
+      return 'Consulta agendada com sucesso.';
+    }
+    const alterados = apenasAlterados(paraEnvio(campos), paraEnvio(originais));
+    if (Object.keys(alterados).length === 0) {
+      setErrosGerais(['Nenhuma alteração para salvar.']);
+      return undefined;
+    }
+    await editarConsulta(consulta.id, alterados);
+    return 'Consulta atualizada.';
+  }
+
   async function enviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
-    const encontrados = validarConsulta(campos);
+    const encontrados = validarConsulta(
+      campos,
+      new Date(),
+      consulta ? originais.dataHora : undefined,
+    );
     setErros(encontrados);
-    setErrosDoServidor([]);
+    setErrosGerais([]);
     if (Object.keys(encontrados).length > 0) return;
 
     setEnviando(true);
     try {
-      await agendarConsulta({
-        nomePaciente: campos.nomePaciente.trim(),
-        cpfPaciente: campos.cpfPaciente,
-        dataHora: paraIsoNaClinica(campos.dataHora),
-        especialidade: campos.especialidade.trim(),
-        observacoes: campos.observacoes.trim() || undefined,
-      });
-      onAgendada();
+      const mensagem = await salvar();
+      if (mensagem) {
+        onSalvo(mensagem);
+        return;
+      }
     } catch (falha) {
-      setErrosDoServidor(mensagensDoErro(falha));
-    } finally {
-      setEnviando(false);
+      setErrosGerais(mensagensDoErro(falha));
     }
+    setEnviando(false);
   }
 
   return (
     <form noValidate onSubmit={enviar} className="flex flex-col gap-4">
-      {errosDoServidor.length > 0 && <Alerta mensagens={errosDoServidor} />}
+      {errosGerais.length > 0 && <Alerta mensagens={errosGerais} />}
 
       <Campo
         id="nomePaciente"
@@ -108,7 +153,7 @@ export function FormularioConsulta({
         <input
           {...propriedadesDe('dataHora')}
           type="datetime-local"
-          min={agoraParaCampo()}
+          min={paraCampo()}
           onChange={(evento) => alterar('dataHora', evento.target.value)}
         />
       </Campo>
@@ -141,10 +186,14 @@ export function FormularioConsulta({
 
       <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
         <Botao variante="secundario" onClick={onCancelar} disabled={enviando}>
-          Cancelar
+          Voltar
         </Botao>
         <Botao type="submit" disabled={enviando}>
-          {enviando ? 'Agendando…' : 'Agendar consulta'}
+          {enviando
+            ? 'Salvando…'
+            : consulta
+              ? 'Salvar alterações'
+              : 'Agendar consulta'}
         </Botao>
       </div>
     </form>

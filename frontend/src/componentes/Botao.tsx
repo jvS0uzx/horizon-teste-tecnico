@@ -10,10 +10,12 @@ const ESTILO_DA_VARIANTE: Record<Variante, string> = {
 
 interface BotaoProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variante?: Variante;
+  soIcone?: boolean;
 }
 
 export function Botao({
   variante = 'primario',
+  soIcone = false,
   className = '',
   type = 'button',
   ...propriedades
@@ -21,7 +23,7 @@ export function Botao({
   return (
     <button
       type={type}
-      className={`inline-flex min-h-11 items-center justify-center border-2 px-5 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amarelo disabled:cursor-not-allowed disabled:border-cinza-claro disabled:bg-cinza-claro disabled:text-grafite ${ESTILO_DA_VARIANTE[variante]} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 border-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amarelo disabled:cursor-not-allowed disabled:border-cinza-claro disabled:bg-cinza-claro disabled:text-grafite ${soIcone ? 'w-11' : 'px-5'} ${ESTILO_DA_VARIANTE[variante]} ${className}`}
       {...propriedades}
     />
   );

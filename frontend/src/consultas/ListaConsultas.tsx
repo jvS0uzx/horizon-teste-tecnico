@@ -1,8 +1,9 @@
-import type { Consulta, StatusFinal } from '../api/consultas.ts';
+import type { Consulta } from '../api/consultas.ts';
 import { Alerta } from '../componentes/Alerta.tsx';
 import { Botao } from '../componentes/Botao.tsx';
 import { formatarDataHora } from '../utilitarios/datas.ts';
 import { AcoesConsulta } from './AcoesConsulta.tsx';
+import type { Acao } from './acoes.ts';
 import { SeloStatus } from './SeloStatus.tsx';
 
 interface ListaConsultasProps {
@@ -10,7 +11,7 @@ interface ListaConsultasProps {
   carregando: boolean;
   erro?: string[];
   onTentarNovamente: () => void;
-  onAlterarStatus: (consulta: Consulta, status: StatusFinal) => void;
+  onEscolherAcao: (consulta: Consulta, acao: Acao) => void;
 }
 
 export function ListaConsultas({
@@ -18,7 +19,7 @@ export function ListaConsultas({
   carregando,
   erro,
   onTentarNovamente,
-  onAlterarStatus,
+  onEscolherAcao,
 }: ListaConsultasProps) {
   if (erro) {
     return (
@@ -76,11 +77,8 @@ export function ListaConsultas({
                 </>
               )}
             </dl>
-            <div className="mt-4 empty:hidden">
-              <AcoesConsulta
-                consulta={consulta}
-                onAlterarStatus={onAlterarStatus}
-              />
+            <div className="mt-4">
+              <AcoesConsulta consulta={consulta} onEscolher={onEscolherAcao} />
             </div>
           </li>
         ))}
@@ -113,7 +111,9 @@ export function ListaConsultas({
                 <p className="font-semibold text-preto">
                   {consulta.nomePaciente}
                 </p>
-                <p className="text-grafite">{consulta.cpfPaciente}</p>
+                <p className="whitespace-nowrap text-grafite">
+                  {consulta.cpfPaciente}
+                </p>
               </td>
               <td className="px-4 py-3 whitespace-nowrap text-preto">
                 {formatarDataHora(consulta.dataHora)}
@@ -132,7 +132,7 @@ export function ListaConsultas({
               <td className="px-4 py-3">
                 <AcoesConsulta
                   consulta={consulta}
-                  onAlterarStatus={onAlterarStatus}
+                  onEscolher={onEscolherAcao}
                 />
               </td>
             </tr>

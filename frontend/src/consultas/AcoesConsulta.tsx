@@ -1,33 +1,31 @@
-import type { Consulta, StatusFinal } from '../api/consultas.ts';
+import type { Consulta } from '../api/consultas.ts';
 import { Botao } from '../componentes/Botao.tsx';
+import { BOTOES_DE_ACAO, type Acao } from './acoes.ts';
 
 interface AcoesConsultaProps {
   consulta: Consulta;
-  onAlterarStatus: (consulta: Consulta, status: StatusFinal) => void;
+  onEscolher: (consulta: Consulta, acao: Acao) => void;
 }
 
-export function AcoesConsulta({
-  consulta,
-  onAlterarStatus,
-}: AcoesConsultaProps) {
-  const { realizar, cancelar } = consulta.acoesPermitidas;
-  if (!realizar && !cancelar) return null;
+export function AcoesConsulta({ consulta, onEscolher }: AcoesConsultaProps) {
+  const botoes = BOTOES_DE_ACAO.filter(
+    ({ permissao }) => consulta.acoesPermitidas[permissao],
+  );
 
   return (
     <div className="flex flex-wrap gap-2">
-      {realizar && (
-        <Botao onClick={() => onAlterarStatus(consulta, 'REALIZADA')}>
-          Realizar
-        </Botao>
-      )}
-      {cancelar && (
+      {botoes.map(({ acao, rotulo, variante, icone: Icone }) => (
         <Botao
-          variante="secundario"
-          onClick={() => onAlterarStatus(consulta, 'CANCELADA')}
+          key={acao}
+          variante={variante}
+          soIcone={Boolean(Icone)}
+          aria-label={rotulo}
+          title={rotulo}
+          onClick={() => onEscolher(consulta, acao)}
         >
-          Cancelar
+          {Icone ? <Icone size={18} aria-hidden /> : rotulo}
         </Botao>
-      )}
+      ))}
     </div>
   );
 }

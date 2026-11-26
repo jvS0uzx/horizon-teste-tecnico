@@ -42,10 +42,10 @@ export function formatarDataHora(iso: string): string {
   return `${formatadorDeData.format(data)} às ${formatadorDeHora.format(data)}`;
 }
 
-export function agoraParaCampo(agora = new Date()): string {
+export function paraCampo(data = new Date()): string {
   const partes = Object.fromEntries(
     formatadorDeCampo
-      .formatToParts(agora)
+      .formatToParts(data)
       .map((parte) => [parte.type, parte.value]),
   );
   return `${partes.year}-${partes.month}-${partes.day}T${partes.hour}:${partes.minute}`;
