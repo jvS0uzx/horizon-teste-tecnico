@@ -11,7 +11,6 @@ import { Botao } from '../componentes/Botao.tsx';
 import { Campo, ESTILO_DE_ENTRADA } from '../componentes/Campo.tsx';
 import { mascararCpf } from '../utilitarios/cpf.ts';
 import { paraCampo, paraIsoNaClinica } from '../utilitarios/datas.ts';
-import { ESPECIALIDADES } from './especialidades.ts';
 import {
   validarConsulta,
   type CamposDaConsulta,
@@ -161,20 +160,14 @@ export function FormularioConsulta({
 
       <Campo
         id="especialidade"
-        rotulo="Especialidade"
+        rotulo="Especialidade / motivo"
         erro={erros.especialidade}
       >
-        <select
+        <input
           {...propriedadesDe('especialidade')}
+          maxLength={100}
           onChange={(evento) => alterar('especialidade', evento.target.value)}
-        >
-          <option value="">Selecione a especialidade</option>
-          {ESPECIALIDADES.map((especialidade) => (
-            <option key={especialidade} value={especialidade}>
-              {especialidade}
-            </option>
-          ))}
-        </select>
+        />
       </Campo>
 
       <Campo

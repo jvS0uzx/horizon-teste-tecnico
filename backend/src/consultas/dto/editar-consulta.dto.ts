@@ -1,5 +1,4 @@
 import { IsOptional } from 'class-validator';
-import { EspecialidadeConsulta } from '../especialidade-consulta.enum.js';
 import {
   CpfPaciente,
   DataHora,
@@ -23,7 +22,7 @@ export class EditarConsultaDto {
 
   @IsOptional()
   @Especialidade()
-  especialidade?: EspecialidadeConsulta;
+  especialidade?: string;
 
   @Observacoes()
   observacoes?: string | null;

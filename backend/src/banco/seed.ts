@@ -1,6 +1,5 @@
 import { FUSO_DA_CLINICA } from '../consultas/calendario.js';
 import { Consulta } from '../consultas/consulta.entity.js';
-import { EspecialidadeConsulta } from '../consultas/especialidade-consulta.enum.js';
 import { StatusConsulta } from '../consultas/status-consulta.enum.js';
 import fonteDados from './fonte-dados.js';
 
@@ -9,7 +8,7 @@ interface ConsultaDeExemplo {
   cpfPaciente: string;
   diasAPartirDeHoje: number;
   horario: string;
-  especialidade: EspecialidadeConsulta;
+  especialidade: string;
   status: StatusConsulta;
   observacoes?: string;
 }
@@ -22,7 +21,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '123.456.789-01',
     diasAPartirDeHoje: -10,
     horario: '09:00',
-    especialidade: EspecialidadeConsulta.Cardiologia,
+    especialidade: 'Cardiologia',
     status: Realizada,
     observacoes: 'Trazer exames de sangue recentes.',
   },
@@ -31,7 +30,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '234.567.890-12',
     diasAPartirDeHoje: -7,
     horario: '14:30',
-    especialidade: EspecialidadeConsulta.Ortopedia,
+    especialidade: 'Ortopedia',
     status: Realizada,
   },
   {
@@ -39,7 +38,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '345.678.901-23',
     diasAPartirDeHoje: -5,
     horario: '11:00',
-    especialidade: EspecialidadeConsulta.Dermatologia,
+    especialidade: 'Dermatologia',
     status: Cancelada,
     observacoes: 'Paciente pediu o cancelamento por telefone.',
   },
@@ -48,7 +47,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '456.789.012-34',
     diasAPartirDeHoje: -3,
     horario: '10:00',
-    especialidade: EspecialidadeConsulta.ClinicaGeral,
+    especialidade: 'Clínica geral',
     status: Realizada,
   },
   {
@@ -56,7 +55,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '567.890.123-45',
     diasAPartirDeHoje: -2,
     horario: '15:00',
-    especialidade: EspecialidadeConsulta.Pediatria,
+    especialidade: 'Pediatria',
     status: Cancelada,
   },
   {
@@ -64,7 +63,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '678.901.234-56',
     diasAPartirDeHoje: -1,
     horario: '16:00',
-    especialidade: EspecialidadeConsulta.Oftalmologia,
+    especialidade: 'Oftalmologia',
     status: Realizada,
     observacoes: 'Retorno em seis meses.',
   },
@@ -73,7 +72,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '789.012.345-67',
     diasAPartirDeHoje: 0,
     horario: '09:00',
-    especialidade: EspecialidadeConsulta.Ginecologia,
+    especialidade: 'Ginecologia',
     status: Agendada,
   },
   {
@@ -81,7 +80,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '890.123.456-78',
     diasAPartirDeHoje: 0,
     horario: '17:30',
-    especialidade: EspecialidadeConsulta.Neurologia,
+    especialidade: 'Neurologia',
     status: Agendada,
     observacoes: 'Primeira consulta.',
   },
@@ -90,7 +89,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '901.234.567-89',
     diasAPartirDeHoje: 1,
     horario: '08:30',
-    especialidade: EspecialidadeConsulta.Endocrinologia,
+    especialidade: 'Endocrinologia',
     status: Agendada,
   },
   {
@@ -98,7 +97,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '012.345.678-90',
     diasAPartirDeHoje: 1,
     horario: '10:00',
-    especialidade: EspecialidadeConsulta.ClinicaGeral,
+    especialidade: 'Clínica geral',
     status: Agendada,
   },
   {
@@ -106,7 +105,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '135.246.357-46',
     diasAPartirDeHoje: 2,
     horario: '14:00',
-    especialidade: EspecialidadeConsulta.Psiquiatria,
+    especialidade: 'Psiquiatria',
     status: Agendada,
   },
   {
@@ -114,7 +113,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '345.678.901-23',
     diasAPartirDeHoje: 3,
     horario: '09:30',
-    especialidade: EspecialidadeConsulta.Dermatologia,
+    especialidade: 'Dermatologia',
     status: Cancelada,
   },
   {
@@ -122,7 +121,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '345.678.901-23',
     diasAPartirDeHoje: 3,
     horario: '09:30',
-    especialidade: EspecialidadeConsulta.Dermatologia,
+    especialidade: 'Dermatologia',
     status: Agendada,
     observacoes: 'Reagendada no mesmo horário após o cancelamento.',
   },
@@ -131,7 +130,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '246.357.468-57',
     diasAPartirDeHoje: 4,
     horario: '09:00',
-    especialidade: EspecialidadeConsulta.Cardiologia,
+    especialidade: 'Cardiologia',
     status: Agendada,
   },
   {
@@ -139,7 +138,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '357.468.579-68',
     diasAPartirDeHoje: 6,
     horario: '13:00',
-    especialidade: EspecialidadeConsulta.Ortopedia,
+    especialidade: 'Ortopedia',
     status: Cancelada,
   },
   {
@@ -147,7 +146,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '468.579.680-79',
     diasAPartirDeHoje: 7,
     horario: '11:30',
-    especialidade: EspecialidadeConsulta.Urologia,
+    especialidade: 'Urologia',
     status: Agendada,
   },
   {
@@ -155,7 +154,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '579.680.791-80',
     diasAPartirDeHoje: 10,
     horario: '15:00',
-    especialidade: EspecialidadeConsulta.Nutricao,
+    especialidade: 'Nutrição',
     status: Agendada,
   },
   {
@@ -163,7 +162,7 @@ const CONSULTAS_DE_EXEMPLO: ConsultaDeExemplo[] = [
     cpfPaciente: '123.456.789-01',
     diasAPartirDeHoje: 14,
     horario: '10:30',
-    especialidade: EspecialidadeConsulta.Cardiologia,
+    especialidade: 'Cardiologia',
     status: Agendada,
     observacoes: 'Retorno da consulta anterior.',
   },

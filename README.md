@@ -288,7 +288,7 @@ Resultado esperado: `PostgreSQL 18.x`.
 | `nome_paciente` | `varchar(150)` | obrigatório, de 3 a 150 caracteres |
 | `cpf_paciente` | `char(14)` | obrigatório, formato `000.000.000-00` |
 | `data_hora` | `timestamptz` | obrigatório, gravado com fuso horário |
-| `especialidade` | `varchar(100)` | obrigatório, uma das especialidades da lista (validada na API) |
+| `especialidade` | `varchar(100)` | obrigatório, de 3 a 100 caracteres |
 | `observacoes` | `varchar(1000)` | opcional, até 1000 caracteres |
 | `status` | enum `status_consulta` | `AGENDADA` (padrão), `REALIZADA` ou `CANCELADA` |
 | `criado_em` | `timestamptz` | preenchido na criação |
@@ -455,13 +455,9 @@ Todo erro responde no mesmo formato, com mensagens em português e sem detalhes 
   essas mudanças são definitivas: não há volta para Agendada nem troca entre Realizada e
   Cancelada.
 - **Agendar:** nome de 3 a 150 caracteres, CPF no formato `000.000.000-00` (só o formato, sem
-  conferir dígitos verificadores), data e hora no futuro, especialidade escolhida da lista e
+  conferir dígitos verificadores), data e hora no futuro, especialidade de 3 a 100 caracteres e
   observações opcionais até 1000 caracteres. Espaços nas pontas são removidos antes da
   validação.
-- **Especialidades:** lista fixa, o enum `EspecialidadeConsulta` da API: Cardiologia, Clínica geral, Dermatologia, Endocrinologia, Ginecologia, Neurologia, Nutrição,
-  Oftalmologia, Ortopedia, Pediatria, Psiquiatria e Urologia. A API
-  recusa qualquer outro valor com 400, e a tela oferece só essas opções. No banco a coluna
-  continua texto, então incluir uma especialidade nova muda só o enum, sem migration.
 - **Duplicidade:** não pode haver duas consultas com o mesmo CPF na mesma data e hora. Consulta
   Cancelada **não** bloqueia: depois de cancelar, o paciente pode agendar de novo naquele
   horário. A regra é verificada no Service e garantida pelo índice único parcial, inclusive em
@@ -515,8 +511,8 @@ pausa curta) e o status e a data, assim que mudam.
 
 ### Agendar
 
-1. Clique em "Nova consulta", preencha nome, CPF (a máscara é aplicada ao digitar) e uma data e
-   hora futura, escolha a especialidade na lista e clique em "Agendar consulta".
+1. Clique em "Nova consulta", preencha nome, CPF (a máscara é aplicada ao digitar), uma data e
+   hora futura e a especialidade, e clique em "Agendar consulta".
    - Esperado: aviso "Consulta agendada com sucesso." e a consulta na lista como Agendada.
 2. Tente agendar com o nome `Jo`.
    - Esperado: "O nome do paciente deve ter entre 3 e 150 caracteres."
@@ -591,13 +587,13 @@ pausa curta) e o status e a data, assim que mudam.
      -H "Content-Type: application/json" -d '{"nomePaciente":'
    curl -i -X POST http://localhost:3000/consultas \
      -H "Content-Type: application/json" \
-     -d '{"nomePaciente":"Maria Souza","cpfPaciente":"123.456.789-00","dataHora":"2030-01-15T10:00:00-03:00","especialidade":"Astrologia"}'
+     -d '{"nomePaciente":"Maria Souza","cpfPaciente":"123.456.789-00","dataHora":"2030-01-15T10:00:00-03:00","especialidade":"ab"}'
    ```
 
    - Esperado, na ordem: 400 "O status deve ser AGENDADA, REALIZADA ou CANCELADA."; 400 "O
      identificador da consulta é inválido."; 404 "Consulta não encontrada."; 400 "O corpo da
-     requisição não é um JSON válido."; 400 "A especialidade informada não está na lista de
-     especialidades."
+     requisição não é um JSON válido."; 400 "A especialidade deve ter entre 3 e 100
+     caracteres."
 4. Pela API, tente mudar o status de uma consulta Realizada (troque `<id>` pelo `id` de uma
    consulta Realizada, visto em `GET /consultas?status=REALIZADA`):
 

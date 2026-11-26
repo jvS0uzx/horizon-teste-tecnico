@@ -1,4 +1,3 @@
-import { EspecialidadeConsulta } from '../especialidade-consulta.enum.js';
 import {
   CpfPaciente,
   DataHora,
@@ -18,7 +17,7 @@ export class CriarConsultaDto {
   dataHora: string;
 
   @Especialidade()
-  especialidade: EspecialidadeConsulta;
+  especialidade: string;
 
   @Observacoes()
   observacoes?: string | null;
