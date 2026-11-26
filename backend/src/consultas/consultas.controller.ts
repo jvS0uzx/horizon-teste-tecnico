@@ -5,11 +5,16 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
-import { Consulta } from './consulta.entity.js';
-import { ConsultasService, PaginaDeConsultas } from './consultas.service.js';
+import { ConsultasService } from './consultas.service.js';
+import { AlterarStatusDto } from './dto/alterar-status.dto.js';
+import {
+  ConsultaResposta,
+  PaginaDeConsultas,
+} from './dto/consulta-resposta.js';
 import { CriarConsultaDto } from './dto/criar-consulta.dto.js';
 import { ListarConsultasDto } from './dto/listar-consultas.dto.js';
 
@@ -28,12 +33,20 @@ export class ConsultasController {
   }
 
   @Get(':id')
-  buscar(@Param('id', ID_DA_CONSULTA) id: string): Promise<Consulta> {
+  buscar(@Param('id', ID_DA_CONSULTA) id: string): Promise<ConsultaResposta> {
     return this.servico.buscar(id);
   }
 
   @Post()
-  agendar(@Body() dados: CriarConsultaDto): Promise<Consulta> {
+  agendar(@Body() dados: CriarConsultaDto): Promise<ConsultaResposta> {
     return this.servico.agendar(dados);
+  }
+
+  @Patch(':id/status')
+  alterarStatus(
+    @Param('id', ID_DA_CONSULTA) id: string,
+    @Body() dados: AlterarStatusDto,
+  ): Promise<ConsultaResposta> {
+    return this.servico.alterarStatus(id, dados);
   }
 }

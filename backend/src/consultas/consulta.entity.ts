@@ -17,6 +17,14 @@ export interface DadosDoAgendamento {
   observacoes?: string | null;
 }
 
+export interface AcoesPermitidas {
+  editar: boolean;
+  remarcar: boolean;
+  realizar: boolean;
+  cancelar: boolean;
+  excluir: boolean;
+}
+
 type StatusFinal = Exclude<StatusConsulta, StatusConsulta.Agendada>;
 
 const MENSAGEM_STATUS_FINAL: Record<StatusFinal, string> = {
@@ -77,6 +85,17 @@ export class Consulta {
     consulta.observacoes = dados.observacoes ?? null;
     consulta.status = StatusConsulta.Agendada;
     return consulta;
+  }
+
+  acoesPermitidas(agora: Date): AcoesPermitidas {
+    const agendada = this.status === StatusConsulta.Agendada;
+    return {
+      editar: agendada,
+      remarcar: agendada,
+      realizar: agendada && mesmoDiaNaClinica(this.dataHora, agora),
+      cancelar: agendada,
+      excluir: true,
+    };
   }
 
   alterarStatus(novoStatus: StatusConsulta, agora: Date): void {
